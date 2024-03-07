@@ -11,11 +11,14 @@
     "lint": "eslint ."
   },
   "devDependencies": {
+    "@types/events": "^3.0.3",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
+    "typed-emitter": "^2.1.0",
     "typescript": "^5.2.2",
-    "vite": "^5.1.4"
+    "vite": "^5.1.4",
+    "vite-plugin-node-polyfills": "^0.21.0"
   }
 }

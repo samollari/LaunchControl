@@ -45,7 +45,31 @@ export class Canvas {
     }
 }
 
-export function renderComponentToLaunchpad(
+export function renderInteractiveComponentToLaunchpad(
+    component: Component,
+    position: Vector,
+    launchpad: LaunchpadModel,
+) {
+    // Initial render
+    const canvas = Canvas.renderComponent(component);
+    renderCanvasToLaunchpad(canvas, position, launchpad);
+
+    // Make interactive
+    launchpad.addListener('touch', (type, position) =>
+        component.touched(type, position),
+    );
+
+    // Make it partially rerender when requested
+    component.requestRender = (componentTrace) => {
+        const canvas = Canvas.renderComponent(
+            component,
+            componentTrace.slice(1),
+        );
+        renderCanvasToLaunchpad(canvas, new Vector(0, 0), launchpad);
+    };
+}
+
+export function renderCanvasToLaunchpad(
     canvas: Canvas,
     position: Vector,
     launchpad: LaunchpadModel,

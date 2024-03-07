@@ -1,3 +1,4 @@
+import { TouchEventType } from '../launchpad/launchpad';
 import Vector from '../vector';
 import { Canvas } from './renderer';
 
@@ -36,13 +37,10 @@ export default abstract class Component {
         this._requestRender = fn;
     }
 
-    public registerTouchEvent(
-        event: 'touchDown' | 'touchUp',
-        position: Vector,
-    ): void {
+    public touched(eventType: TouchEventType, position: Vector): void {
         console.warn(
             "Component was touched but doesn't have a registered touch handler!",
-            { event, position },
+            { event: eventType, position },
         );
     }
 

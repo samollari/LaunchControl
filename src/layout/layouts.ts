@@ -1,3 +1,4 @@
+import { TouchEventType } from '../launchpad/launchpad';
 import {
     GridIndexTranslator,
     assertIsElementOf,
@@ -154,16 +155,13 @@ export class GridLayoutComponent extends LayoutComponent {
         copyToPosition(renderTarget, childCanvas, componentPosition);
     }
 
-    public registerTouchEvent(
-        event: 'touchDown' | 'touchUp',
-        position: Vector,
-    ): void {
+    public touched(event: TouchEventType, position: Vector): void {
         const touchedElementPos = position.elwiseDiv(this.gridSize, true);
         const touchedIndex = this.indexTranslator.getIndex(touchedElementPos);
 
         const touchedElBasePos = position.elwiseMult(this.gridSize);
         const offset = position.sub(touchedElBasePos);
 
-        this.components[touchedIndex].registerTouchEvent(event, offset);
+        this.components[touchedIndex].touched(event, offset);
     }
 }

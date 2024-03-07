@@ -6,8 +6,11 @@ import {
     assertIsStandardColor,
     isStandardColor,
 } from './ledcolor';
-import { SysExMessage } from './midimessages';
-import { ascii } from '../util';
+import { MIDIMessageType, SysExMessage } from './midimessages';
+import { GridIndexTranslator, ascii } from '../util';
+import TypedEmitter from 'typed-emitter';
+import { EventEmitter } from 'events';
+import Vector from '../vector';
 
 export enum LaunchpadStatus {
     UNINITIALIZED,
@@ -45,7 +48,13 @@ export type FaderConfig = {
     initialValue: number;
 };
 
-export interface LaunchpadModel {
+export type TouchEventType = 'touchDown' | 'touchUp';
+
+type LaunchpadEvents = {
+    touch: (eventType: TouchEventType, position: Vector) => void;
+};
+
+export interface LaunchpadModel extends TypedEmitter<LaunchpadEvents> {
     get status(): LaunchpadStatus;
     set mode(mode: LaunchpadMode);
     set layout(layout: LaunchpadLayout);
@@ -68,12 +77,16 @@ export interface LaunchpadModel {
     faderSetup(faders: FaderConfig[]): void;
 }
 
-export default class Launchpad implements LaunchpadModel {
+export default class Launchpad
+    extends (EventEmitter as new () => TypedEmitter<LaunchpadEvents>)
+    implements LaunchpadModel
+{
     public readonly input: MIDIInput;
     public readonly output: MIDIOutput;
     protected _status: LaunchpadStatus;
 
     public constructor(input: MIDIInput, output: MIDIOutput) {
+        super();
         this._status = LaunchpadStatus.UNINITIALIZED;
         this.input = input;
         this.output = output;
@@ -108,6 +121,27 @@ export default class Launchpad implements LaunchpadModel {
             throw e;
         }
         this._status = LaunchpadStatus.READY;
+
+        const padIndexTranslator = new GridIndexTranslator(new Vector(10, 10));
+        this.input.addEventListener('midimessage', (e) => {
+            const { data } = e as MIDIMessageEvent;
+            const [msgType, pad, vel] = data;
+            if (
+                !(
+                    msgType == MIDIMessageType.NOTE ||
+                    msgType == MIDIMessageType.SYSEX
+                )
+            ) {
+                return;
+            }
+
+            const touchPosition = padIndexTranslator
+                .getPosition(pad)
+                .elwiseMult(new Vector(1, -1))
+                .add(new Vector(0, 9));
+            const eventType = vel > 0 ? 'touchDown' : 'touchUp';
+            this.emit('touch', eventType, touchPosition);
+        });
     }
 
     get status(): LaunchpadStatus {
