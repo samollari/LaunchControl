@@ -75,10 +75,24 @@ export function assertIsWithinBounds(...args: Parameters<typeof isWithinBounds>)
     }
 }
 
-export function callForGrid(size: Vector, fn: (x: number, y: number) => void): void {
+export function callForGrid(size: Vector, fn: (vec: Vector) => void): void {
     for (let x of range(size.x)) {
         for (let y of range(size.y)) {
-            fn(x, y);
+            fn(new Vector(x, y));
         }
+    }
+}
+
+export function sum(a: number, b: number): number {
+    return a + b;
+}
+
+export function max(a: number, b: number): number {
+    return Math.max(a, b);
+}
+
+export function assertIsElementOf<T>(needle: T, haystack: T[]): void {
+    if (!haystack.includes(needle)) {
+        throw new Error('Element is not a member of the given array!');
     }
 }

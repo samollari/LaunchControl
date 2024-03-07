@@ -1,21 +1,34 @@
 import Vector from "../vector";
-import ComponentRenderer from "./renderer";
+import { Canvas } from "./renderer";
 
 export type LocalRenderPixel = {
     position: Vector;
     color: number;
 };
 
-export default abstract class Component {
-    public readonly topLeftCorner: Vector;
-    public readonly size: Vector;
-    protected renderer: ComponentRenderer;
+export type RequestRenderFunction = (componentTrace: Component[]) => void;
 
-    public constructor(topLeftCorner: Vector, size: Vector, renderer: ComponentRenderer) {
-        this.topLeftCorner = topLeftCorner;
+export default abstract class Component {
+    public readonly size: Vector;
+    protected _requestRender: RequestRenderFunction | undefined;
+
+    public constructor(size: Vector) {
         this.size = size;
-        this.renderer = renderer;
     }
 
-    public abstract render(renderTarget: number[][]): void;
+    public abstract render(renderTarget: Canvas): void;
+
+    public get requestRender(): RequestRenderFunction {
+        if (!this._requestRender) {
+            throw Error('Called requestRender before parent component was initialized');
+        }
+        return this._requestRender;
+    }
+
+    public set requestRender(fn: RequestRenderFunction) {
+        if (this._requestRender) {
+            throw Error('Component already has a requestRender function defined');
+        }
+        this._requestRender = fn;
+    }
 }

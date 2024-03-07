@@ -1,57 +1,78 @@
 import { LaunchpadModel } from "../launchpad";
 import { StandardLEDColorDefinition } from "../ledcolor";
-import { assertIsInteger, assertIsWithinBounds, callForGrid, range } from "../util";
+import { callForGrid, range } from "../util";
 import Vector from "../vector";
 import Component, { LocalRenderPixel } from "./component";
+import { LayoutComponent } from "./layouts";
 
-export default class ComponentRenderer {
-    protected launchpad: LaunchpadModel;
 
-    public constructor(launchpad: LaunchpadModel) {
-        this.launchpad = launchpad;
+export class Canvas {
+    public readonly buffer: number[][];
+    public readonly size: Vector;
+
+    public constructor(size: Vector) {
+        this.size = size;
+        this.buffer = createRenderTarget(size);
     }
 
-    public render(component: Component) {
-        let pixels = Array<Array<number>>(component.size.x);
-        for (let x of range(pixels.length)) {
-            pixels[x] = Array<number>(component.size.y);
+    public set(position: Vector, color: number): void {
+        this.buffer[position.x][position.y] = color;
+    }
+
+    public get(position: Vector): number {
+        return this.buffer[position.x][position.y];
+    }
+
+    public static renderComponent(component: Component | LayoutComponent, componentTrace?: Component[]): Canvas {
+        const canvas = new Canvas(component.size);
+        if ('partialRender' in component && componentTrace !== undefined && componentTrace.length > 0) {
+            component.partialRender(componentTrace, canvas);
+        } else {
+            if ('partialRender' in component) {
+                console.warn('Full rendering layout component due to empty or undefined component trace');
+            }
+            component.render(canvas);
         }
-        component.render(pixels);
-        this.launchpad.setLEDs(
-            flattenAndLabelPixelMap(pixels, component.size).map(led =>
-                new StandardLEDColorDefinition(
-                    positionToIndex(
-                        transposeToGlobalCoordinates(
-                            component,
-                            led.position
-                        )
-                    ),
-                    led.color
-                )
-            )
-        );
+        return canvas;
     }
-
 }
 
-export function flattenAndLabelPixelMap(pixelMap: number[][], size: Vector): LocalRenderPixel[] {
+export function renderComponentToLaunchpad(component: Component, position: Vector, launchpad: LaunchpadModel): void {
+    const canvas = Canvas.renderComponent(component);
+    launchpad.setLEDs(
+        flattenAndLabelPixelMap(canvas).map(led =>
+            new StandardLEDColorDefinition(
+                positionToIndex(led.position.add(position)),
+                led.color
+            )
+        )
+    );
+}
+
+export function createRenderTarget(size: Vector): number[][] {
+    let pixels = Array<Array<number>>(size.x);
+    for (let x of range(pixels.length)) {
+        pixels[x] = Array<number>(size.y);
+    }
+    return pixels;
+}
+
+export function flattenAndLabelPixelMap(canvas: Canvas): LocalRenderPixel[] {
     let renderedPixels = Array<LocalRenderPixel>();
-    callForGrid(size, (x, y) => {
+    callForGrid(canvas.size, (position) => {
         renderedPixels.push({
-            position: new Vector(x, y),
-            color: pixelMap[x][y]
+            position: position,
+            color: canvas.get(position)
         });
     });
     return renderedPixels;
 }
 
-export function transposeToGlobalCoordinates(component: Component, offset: Vector): Vector {
-    assertIsInteger(offset.x);
-    assertIsInteger(offset.y);
-    assertIsWithinBounds(offset.x, 0, component.size.x - 1);
-    assertIsWithinBounds(offset.y, 0, component.size.y - 1);
-
-    return component.topLeftCorner.add(offset);
+export function copyToPosition(parentCanvas: Canvas, childCanvas: Canvas, position: Vector) {
+    callForGrid(childCanvas.size, (offset) => {
+        const target = position.add(offset);
+        parentCanvas.set(target, childCanvas.get(offset));
+    });
 }
 
 export function positionToIndex(position: Vector): number {
