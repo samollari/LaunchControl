@@ -1,5 +1,5 @@
-import { LaunchpadModel } from "../launchpad";
-import { StandardLEDColorDefinition } from "../ledcolor";
+import { LaunchpadModel } from "../launchpad/launchpad";
+import { StandardLEDColorDefinition } from "../launchpad/ledcolor";
 import { callForGrid, range } from "../util";
 import Vector from "../vector";
 import Component, { LocalRenderPixel } from "./component";

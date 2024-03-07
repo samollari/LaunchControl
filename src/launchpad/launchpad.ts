@@ -1,6 +1,6 @@
-import { RGBColor, RGBLEDColorDefinition, StandardLEDColorDefinition, assertIsLEDIndex, assertIsRGBColor, assertIsStandardColor, isStandardColor } from "./ledcolor";
+import { RGBColor, RGBLEDColorDefinition, StandardLEDColorDefinition, assertIsRGBColor, assertIsStandardColor, isStandardColor } from "./ledcolor";
 import { SysExMessage } from "./midimessages";
-import { ascii } from "./util";
+import { ascii } from "../util";
 
 export enum LaunchpadStatus {
     UNINITIALIZED,
@@ -9,29 +9,29 @@ export enum LaunchpadStatus {
     PROBLEM
 }
 
-export enum Mode {
+export enum LaunchpadMode {
     ABLETON = 0x00,
     STANDALONE = 0x01
 }
 
-export enum Layout {
+export enum LaunchpadLayout {
     NOTE = 0x00,
     DRUM = 0x01,
     FADER = 0x02,
     PROGRAMMER = 0x03
 }
 
-enum GridSize {
+export enum GridSize {
     TEN_BY_TEN = 0,
     EIGHT_BY_EIGHT = 1
 }
 
-enum FaderType {
+export enum FaderType {
     VOLUME = 0,
     PAN = 1
 }
 
-type FaderConfig = {
+export type FaderConfig = {
     number: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7,
     type: FaderType,
     color: number,
@@ -40,8 +40,8 @@ type FaderConfig = {
 
 export interface LaunchpadModel {
     get status(): LaunchpadStatus;
-    set mode(mode: Mode);
-    set layout(layout: Layout);
+    set mode(mode: LaunchpadMode);
+    set layout(layout: LaunchpadLayout);
 
     setLEDs(leds: StandardLEDColorDefinition[]): void;
     setLEDsRGB(leds: RGBLEDColorDefinition[]): void;
@@ -100,11 +100,11 @@ export default class Launchpad implements LaunchpadModel {
         return this._status;
     }
 
-    set mode(mode: Mode) {
+    set mode(mode: LaunchpadMode) {
         this.output.send(new SysExMessage(0x2D, [mode]));
     }
 
-    set layout(layout: Layout) {
+    set layout(layout: LaunchpadLayout) {
         this.output.send(new SysExMessage(0x2C, [layout]));
     }
 

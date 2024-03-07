@@ -1,7 +1,9 @@
-import { renderComponentToLaunchpad } from "./components/renderer";
-import TestComponent from "./components/testcomponent";
-import ULXD4QComponent from "./components/ulxd4q";
-import Launchpad, { Layout } from "./launchpad";
+import { VerticalLayoutComponent } from "./layout/layouts";
+import { renderComponentToLaunchpad } from "./layout/renderer";
+import PalleteTestComponent from "./components/test/pallete";
+import RandomColorComponent from "./components/test/randomcolor";
+import Launchpad, { LaunchpadLayout } from "./launchpad/launchpad";
+import { range } from "./util";
 import Vector from "./vector";
 
 let launchpad: Launchpad;
@@ -70,7 +72,7 @@ async function withMidiAccess(access: MIDIAccess) {
     launchpad = new Launchpad(inputDevice, outputDevice);
     await launchpad.init();
     launchpad.clear();
-    launchpad.layout = Layout.PROGRAMMER;
+    launchpad.layout = LaunchpadLayout.PROGRAMMER;
     // launchpad.scrollText(0x7C, true, [
     //     {
     //         speed: 5,
@@ -85,7 +87,11 @@ async function withMidiAccess(access: MIDIAccess) {
     // launchpad.flashLEDs([new StandardLEDColorDefinition(0x0A, 72)]);
 
     // const component = new TestComponent(new Vector(8, 1));
-    const component = new ULXD4QComponent(new Vector(8, 1));
+    const components = [];
+    for (let _ of range(8)) {
+        components.push(new RandomColorComponent(new Vector(8, 1)));
+    }
+    const component = new VerticalLayoutComponent(components);
     setInterval(() => {
         renderComponentToLaunchpad(component, new Vector(1, 1), launchpad);
     }, 1000);

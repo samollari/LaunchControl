@@ -51,3 +51,29 @@ export class HorizontalLayoutComponent extends LayoutComponent {
         copyToPosition(renderTarget, childCanvas, new Vector(x, 0));
     }
 }
+
+
+export class VerticalLayoutComponent extends LayoutComponent {
+
+    public constructor(components: Component[]) {
+        let maxWidth = components.map(component => component.size.x).reduce(max);
+        let totalHeight = components.map(component => component.size.y).reduce(sum);
+        super(components, new Vector(maxWidth, totalHeight));
+    }
+
+
+    public render(renderTarget: Canvas): void {
+        let y = 0;
+        for (let component of this.components) {
+            const childCanvas = Canvas.renderComponent(component);
+            copyToPosition(renderTarget, childCanvas, new Vector(0, y));
+            y += component.size.y;
+        }
+    }
+
+    public partialRender(componentTrace: Component[], renderTarget: Canvas): void {
+        const childCanvas = this.prepPartialRender(componentTrace);
+        let y = this.components.map(component => component.size.y).reduce(sum);
+        copyToPosition(renderTarget, childCanvas, new Vector(0, y));
+    }
+}
