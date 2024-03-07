@@ -104,3 +104,20 @@ export function assertIsElementOf<T>(needle: T, haystack: T[]): void {
         throw new Error('Element is not a member of the given array!');
     }
 }
+
+export class GridIndexTranslator {
+    public size: Vector;
+    public constructor(size: Vector) {
+        this.size = size;
+    }
+
+    public getIndex({ x, y }: Vector): number {
+        return y * this.size.x + x;
+    }
+
+    public getPosition(index: number): Vector {
+        const x = index % this.size.x;
+        const y = Math.floor(index / this.size.x);
+        return new Vector(x, y);
+    }
+}

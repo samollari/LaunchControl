@@ -35,4 +35,8 @@ export default abstract class Component {
         }
         this._requestRender = fn;
     }
+
+    public static getSize(axis: 'x' | 'y'): (component: Component) => number {
+        return (component: Component) => component.size[axis];
+    }
 }

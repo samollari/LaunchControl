@@ -1,4 +1,10 @@
-import { assertIsElementOf, max, sum } from '../util';
+import {
+    GridIndexTranslator,
+    assertIsElementOf,
+    callForGrid,
+    max,
+    sum,
+} from '../util';
 import Vector from '../vector';
 import Component, { RequestRenderFunction } from './component';
 import { Canvas, copyToPosition } from './renderer';
@@ -24,10 +30,10 @@ export abstract class LayoutComponent extends Component {
         });
     }
 
-    protected prepPartialRender(componentTrace: Component[]): Canvas {
-        const myChild = componentTrace[0];
-        assertIsElementOf(myChild, this.components);
-        return Canvas.renderComponent(myChild, componentTrace.slice(1));
+    protected partialRenderRequestedChild(componentTrace: Component[]): Canvas {
+        const childComponent = componentTrace[0];
+        assertIsElementOf(childComponent, this.components);
+        return Canvas.renderComponent(childComponent, componentTrace.slice(1));
     }
 }
 
@@ -55,7 +61,7 @@ export class HorizontalLayoutComponent extends LayoutComponent {
         componentTrace: Component[],
         renderTarget: Canvas,
     ): void {
-        const childCanvas = this.prepPartialRender(componentTrace);
+        const childCanvas = this.partialRenderRequestedChild(componentTrace);
         const x = this.components
             .map((component) => component.size.x)
             .reduce(sum);
@@ -87,10 +93,64 @@ export class VerticalLayoutComponent extends LayoutComponent {
         componentTrace: Component[],
         renderTarget: Canvas,
     ): void {
-        const childCanvas = this.prepPartialRender(componentTrace);
+        const childCanvas = this.partialRenderRequestedChild(componentTrace);
         const y = this.components
             .map((component) => component.size.y)
             .reduce(sum);
         copyToPosition(renderTarget, childCanvas, new Vector(0, y));
+    }
+}
+
+export class GridLayoutComponent extends LayoutComponent {
+    public readonly gridDimensions: Vector;
+    public readonly gridSize: Vector;
+
+    protected readonly indexTranslator: GridIndexTranslator;
+
+    public constructor(components: Component[], size: Vector) {
+        if (components.length > size.x * size.y) {
+            throw new TypeError(
+                'Grid layout may not have more children than available spaces',
+            );
+        }
+        const maxElementXSize = components
+            .map(Component.getSize('x'))
+            .reduce(max);
+        const maxElementYSize = components
+            .map(Component.getSize('y'))
+            .reduce(max);
+        const gridSize = new Vector(maxElementXSize, maxElementYSize);
+        super(components, gridSize.elwiseMult(size));
+        this.gridDimensions = size;
+        this.gridSize = gridSize;
+        this.indexTranslator = new GridIndexTranslator(this.gridDimensions);
+    }
+
+    public render(renderTarget: Canvas): void {
+        callForGrid(this.gridDimensions, (position) => {
+            const childCanvas = Canvas.renderComponent(
+                this.components[this.indexTranslator.getIndex(position)],
+            );
+            copyToPosition(
+                renderTarget,
+                childCanvas,
+                position.elwiseMult(this.gridSize),
+            );
+        });
+    }
+
+    public partialRender(
+        componentTrace: Component[],
+        renderTarget: Canvas,
+    ): void {
+        const childCanvas = this.partialRenderRequestedChild(componentTrace);
+
+        const component = componentTrace[0];
+        const componentIndex = this.components.findIndex(
+            (cmp) => cmp == component,
+        );
+        const componentPosition =
+            this.indexTranslator.getPosition(componentIndex);
+        copyToPosition(renderTarget, childCanvas, componentPosition);
     }
 }

@@ -1,10 +1,12 @@
-import { VerticalLayoutComponent } from './layout/layouts';
+import { GridLayoutComponent } from './layout/layouts';
 import { renderComponentToLaunchpad } from './layout/renderer';
 // import PalleteTestComponent from './components/test/pallete';
-import RandomColorComponent from './components/test/randomcolor';
+// import RandomColorComponent from './components/test/randomcolor';
+// import { VerticalLayoutComponent } from './layout/layouts';
 import Launchpad, { LaunchpadLayout } from './launchpad/launchpad';
 import { range } from './util';
 import Vector from './vector';
+import BubbleWrapComponent from './components/test/bubblewrap';
 
 let launchpad: Launchpad;
 
@@ -100,14 +102,25 @@ async function withMidiAccess(access: MIDIAccess) {
     // launchpad.flashLEDs([new StandardLEDColorDefinition(0x0A, 72)]);
 
     // const component = new TestComponent(new Vector(8, 1));
+
+    // const components = [];
+    // for (const _ of range(8)) {
+    //     components.push(new RandomColorComponent(new Vector(8, 1)));
+    // }
+    // const component = new VerticalLayoutComponent(components);
+    // setInterval(() => {
+    //     renderComponentToLaunchpad(component, new Vector(1, 1), launchpad);
+    // }, 1000);
+
     const components = [];
-    for (const _ of range(8)) {
-        components.push(new RandomColorComponent(new Vector(8, 1)));
+    for (const _ of range(100)) {
+        components.push(new BubbleWrapComponent());
     }
-    const component = new VerticalLayoutComponent(components);
-    setInterval(() => {
-        renderComponentToLaunchpad(component, new Vector(1, 1), launchpad);
-    }, 1000);
+    const gridComponent = new GridLayoutComponent(
+        components,
+        new Vector(10, 10),
+    );
+    renderComponentToLaunchpad(gridComponent, new Vector(0, 0), launchpad);
 }
 
 main();

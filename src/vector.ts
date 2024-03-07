@@ -10,4 +10,12 @@ export default class Vector {
     public add(other: Vector): Vector {
         return new Vector(this.x + other.x, this.y + other.y);
     }
+
+    public elwiseMult(other: Vector): Vector {
+        return new Vector(this.x * other.x, this.y * other.y);
+    }
+
+    public equals(other: Vector): boolean {
+        return this.x == other.x && this.y == other.y;
+    }
 }

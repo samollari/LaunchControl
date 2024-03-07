@@ -52,14 +52,25 @@ export function renderComponentToLaunchpad(
 ): void {
     const canvas = Canvas.renderComponent(component);
     launchpad.setLEDs(
-        flattenAndLabelPixelMap(canvas).map(
-            (led) =>
-                new StandardLEDColorDefinition(
-                    positionToIndex(led.position.add(position)),
-                    led.color,
-                ),
-        ),
+        flattenAndLabelPixelMap(canvas)
+            .filter(notCorners)
+            .map(
+                (led) =>
+                    new StandardLEDColorDefinition(
+                        positionToIndex(led.position.add(position)),
+                        led.color,
+                    ),
+            ),
     );
+}
+
+function notCorners({ position }: LocalRenderPixel): boolean {
+    return ![
+        new Vector(0, 0),
+        new Vector(9, 0),
+        new Vector(0, 9),
+        new Vector(9, 9),
+    ].some((vec) => vec.equals(position));
 }
 
 export function createRenderTarget(size: Vector): number[][] {
