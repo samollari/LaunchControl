@@ -84,8 +84,8 @@ export function assertIsWithinBounds(
 }
 
 export function callForGrid(size: Vector, fn: (vec: Vector) => void): void {
-    for (let x of range(size.x)) {
-        for (let y of range(size.y)) {
+    for (const x of range(size.x)) {
+        for (const y of range(size.y)) {
             fn(new Vector(x, y));
         }
     }

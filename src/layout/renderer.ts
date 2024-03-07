@@ -63,15 +63,15 @@ export function renderComponentToLaunchpad(
 }
 
 export function createRenderTarget(size: Vector): number[][] {
-    let pixels = Array<Array<number>>(size.x);
-    for (let x of range(pixels.length)) {
+    const pixels = Array<Array<number>>(size.x);
+    for (const x of range(pixels.length)) {
         pixels[x] = Array<number>(size.y);
     }
     return pixels;
 }
 
 export function flattenAndLabelPixelMap(canvas: Canvas): LocalRenderPixel[] {
-    let renderedPixels = Array<LocalRenderPixel>();
+    const renderedPixels = Array<LocalRenderPixel>();
     callForGrid(canvas.size, (position) => {
         renderedPixels.push({
             position: position,

@@ -1,6 +1,6 @@
 import { VerticalLayoutComponent } from './layout/layouts';
 import { renderComponentToLaunchpad } from './layout/renderer';
-import PalleteTestComponent from './components/test/pallete';
+// import PalleteTestComponent from './components/test/pallete';
 import RandomColorComponent from './components/test/randomcolor';
 import Launchpad, { LaunchpadLayout } from './launchpad/launchpad';
 import { range } from './util';
@@ -10,7 +10,7 @@ let launchpad: Launchpad;
 
 async function main() {
     const midiPermissions = await navigator.permissions.query({
-        // @ts-ignore Doesn't include midi types
+        // @ts-expect-error Doesn't include midi types
         name: 'midi',
         sysex: true,
     });
@@ -101,7 +101,7 @@ async function withMidiAccess(access: MIDIAccess) {
 
     // const component = new TestComponent(new Vector(8, 1));
     const components = [];
-    for (let _ of range(8)) {
+    for (const _ of range(8)) {
         components.push(new RandomColorComponent(new Vector(8, 1)));
     }
     const component = new VerticalLayoutComponent(components);

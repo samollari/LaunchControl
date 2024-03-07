@@ -33,10 +33,10 @@ export abstract class LayoutComponent extends Component {
 
 export class HorizontalLayoutComponent extends LayoutComponent {
     public constructor(components: Component[]) {
-        let totalWidth = components
+        const totalWidth = components
             .map((component) => component.size.x)
             .reduce(sum);
-        let maxHeight = components
+        const maxHeight = components
             .map((component) => component.size.y)
             .reduce(max);
         super(components, new Vector(totalWidth, maxHeight));
@@ -44,7 +44,7 @@ export class HorizontalLayoutComponent extends LayoutComponent {
 
     public render(renderTarget: Canvas): void {
         let x = 0;
-        for (let component of this.components) {
+        for (const component of this.components) {
             const childCanvas = Canvas.renderComponent(component);
             copyToPosition(renderTarget, childCanvas, new Vector(x, 0));
             x += component.size.x;
@@ -56,7 +56,7 @@ export class HorizontalLayoutComponent extends LayoutComponent {
         renderTarget: Canvas,
     ): void {
         const childCanvas = this.prepPartialRender(componentTrace);
-        let x = this.components
+        const x = this.components
             .map((component) => component.size.x)
             .reduce(sum);
         copyToPosition(renderTarget, childCanvas, new Vector(x, 0));
@@ -65,10 +65,10 @@ export class HorizontalLayoutComponent extends LayoutComponent {
 
 export class VerticalLayoutComponent extends LayoutComponent {
     public constructor(components: Component[]) {
-        let maxWidth = components
+        const maxWidth = components
             .map((component) => component.size.x)
             .reduce(max);
-        let totalHeight = components
+        const totalHeight = components
             .map((component) => component.size.y)
             .reduce(sum);
         super(components, new Vector(maxWidth, totalHeight));
@@ -76,7 +76,7 @@ export class VerticalLayoutComponent extends LayoutComponent {
 
     public render(renderTarget: Canvas): void {
         let y = 0;
-        for (let component of this.components) {
+        for (const component of this.components) {
             const childCanvas = Canvas.renderComponent(component);
             copyToPosition(renderTarget, childCanvas, new Vector(0, y));
             y += component.size.y;
@@ -88,7 +88,7 @@ export class VerticalLayoutComponent extends LayoutComponent {
         renderTarget: Canvas,
     ): void {
         const childCanvas = this.prepPartialRender(componentTrace);
-        let y = this.components
+        const y = this.components
             .map((component) => component.size.y)
             .reduce(sum);
         copyToPosition(renderTarget, childCanvas, new Vector(0, y));
