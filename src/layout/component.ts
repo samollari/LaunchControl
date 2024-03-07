@@ -1,5 +1,5 @@
-import Vector from "../vector";
-import { Canvas } from "./renderer";
+import Vector from '../vector';
+import { Canvas } from './renderer';
 
 export type LocalRenderPixel = {
     position: Vector;
@@ -20,14 +20,18 @@ export default abstract class Component {
 
     public get requestRender(): RequestRenderFunction {
         if (!this._requestRender) {
-            throw Error('Called requestRender before parent component was initialized');
+            throw Error(
+                'Called requestRender before parent component was initialized',
+            );
         }
         return this._requestRender;
     }
 
     public set requestRender(fn: RequestRenderFunction) {
         if (this._requestRender) {
-            throw Error('Component already has a requestRender function defined');
+            throw Error(
+                'Component already has a requestRender function defined',
+            );
         }
         this._requestRender = fn;
     }

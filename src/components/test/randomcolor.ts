@@ -1,6 +1,6 @@
-import { callForGrid } from "../../util";
-import Component from "../../layout/component";
-import { Canvas } from "../../layout/renderer";
+import { callForGrid } from '../../util';
+import Component from '../../layout/component';
+import { Canvas } from '../../layout/renderer';
 
 export default class RandomColorComponent extends Component {
     public render(renderTarget: Canvas): void {

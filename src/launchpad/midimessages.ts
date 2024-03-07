@@ -3,8 +3,10 @@ export abstract class MIDIMessage implements Iterable<number> {
 }
 
 export class SysExMessage extends MIDIMessage {
-    private static readonly header = new Uint8Array([0xF0, 0x00, 0x20, 0x29, 0x02, 0x10]);
-    private static readonly trailer = new Uint8Array([0xF7]);
+    private static readonly header = new Uint8Array([
+        0xf0, 0x00, 0x20, 0x29, 0x02, 0x10,
+    ]);
+    private static readonly trailer = new Uint8Array([0xf7]);
     public readonly messageType: number;
     public message: Uint8Array;
 
@@ -15,7 +17,12 @@ export class SysExMessage extends MIDIMessage {
     }
 
     [Symbol.iterator](): Iterator<number> {
-        return [...SysExMessage.header, this.messageType, ...this.message, ...SysExMessage.trailer][Symbol.iterator]();
+        return [
+            ...SysExMessage.header,
+            this.messageType,
+            ...this.message,
+            ...SysExMessage.trailer,
+        ][Symbol.iterator]();
     }
 }
 

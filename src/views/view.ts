@@ -1,4 +1,4 @@
-import { LaunchpadModel } from "../launchpad/launchpad";
+import { LaunchpadModel } from '../launchpad/launchpad';
 
 export default class View {
     protected readonly launchpad: LaunchpadModel;

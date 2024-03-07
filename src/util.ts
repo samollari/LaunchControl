@@ -1,4 +1,4 @@
-import Vector from "./vector";
+import Vector from './vector';
 
 export async function wait(ms: number) {
     return new Promise((resolve) => {
@@ -7,14 +7,17 @@ export async function wait(ms: number) {
 }
 
 export function range(count: number): Generator<number>;
-export function range(start: number, stop: number, step?: number): Generator<number>;
+export function range(
+    start: number,
+    stop: number,
+    step?: number,
+): Generator<number>;
 export function range(a: number, b?: number, c?: number): Generator<number> {
-    
     const isCountSignature = b === undefined;
     let start: number,
         stop: number,
         step = 1;
-    
+
     if (isCountSignature) {
         start = 0;
         stop = a;
@@ -27,8 +30,11 @@ export function range(a: number, b?: number, c?: number): Generator<number> {
     return rangeImpl(start, stop, step);
 }
 
-function* rangeImpl(start: number, stop: number, step: number): Generator<number> {
-
+function* rangeImpl(
+    start: number,
+    stop: number,
+    step: number,
+): Generator<number> {
     if (start < stop && step > 0) {
         for (let i = start; i < stop; i += step) {
             yield i;
@@ -38,7 +44,7 @@ function* rangeImpl(start: number, stop: number, step: number): Generator<number
             yield i;
         }
     } else {
-        console.error({start, stop, step});
+        console.error({ start, stop, step });
         throw new Error(`range(...) arguments would cause an infinite loop`);
     }
 }
@@ -47,7 +53,7 @@ export function ascii(text: string): Uint8Array {
     const data = new Uint8Array(text.length);
     for (let i = 0; i < text.length; i++) {
         const code = text.charCodeAt(i);
-        if (code < 0x20 || code >= 0x7F) {
+        if (code < 0x20 || code >= 0x7f) {
             throw RangeError('Given text is not representable in ASCII');
         }
         data.set([code], i);
@@ -69,7 +75,9 @@ export function isWithinBounds(val: number, min: number, max: number): boolean {
     return val >= min && val <= max;
 }
 
-export function assertIsWithinBounds(...args: Parameters<typeof isWithinBounds>): void {
+export function assertIsWithinBounds(
+    ...args: Parameters<typeof isWithinBounds>
+): void {
     if (!isWithinBounds(...args)) {
         throw new RangeError('Value is not within bounds');
     }

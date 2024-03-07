@@ -10,6 +10,6 @@ Use a Launchpad MIDI Controller to monitor and control Shure ULXD receivers
 1. `npm install`
 2. `npm run dev -- --open`
 
-
 ## Deploying
+
 Will be written soon
