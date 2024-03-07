@@ -46,11 +46,10 @@ export class Canvas {
 }
 
 export function renderComponentToLaunchpad(
-    component: Component,
+    canvas: Canvas,
     position: Vector,
     launchpad: LaunchpadModel,
 ): void {
-    const canvas = Canvas.renderComponent(component);
     launchpad.setLEDs(
         flattenAndLabelPixelMap(canvas)
             .filter(notCorners)

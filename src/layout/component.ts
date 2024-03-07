@@ -36,6 +36,16 @@ export default abstract class Component {
         this._requestRender = fn;
     }
 
+    public registerTouchEvent(
+        event: 'touchDown' | 'touchUp',
+        position: Vector,
+    ): void {
+        console.warn(
+            "Component was touched but doesn't have a registered touch handler!",
+            { event, position },
+        );
+    }
+
     public static getSize(axis: 'x' | 'y'): (component: Component) => number {
         return (component: Component) => component.size[axis];
     }

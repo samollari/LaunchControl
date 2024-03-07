@@ -12,4 +12,11 @@ export default class BubbleWrapComponent extends Component {
     public render(renderTarget: Canvas): void {
         renderTarget.set(new Vector(0, 0), this.popped ? 0 : 3);
     }
+
+    public registerTouchEvent(event: 'touchDown' | 'touchUp'): void {
+        if (event === 'touchDown') {
+            this.popped = true;
+            this.requestRender([]);
+        }
+    }
 }

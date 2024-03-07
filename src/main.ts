@@ -1,12 +1,13 @@
 import { GridLayoutComponent } from './layout/layouts';
-import { renderComponentToLaunchpad } from './layout/renderer';
+import { Canvas, renderComponentToLaunchpad } from './layout/renderer';
 // import PalleteTestComponent from './components/test/pallete';
 // import RandomColorComponent from './components/test/randomcolor';
 // import { VerticalLayoutComponent } from './layout/layouts';
 import Launchpad, { LaunchpadLayout } from './launchpad/launchpad';
-import { range } from './util';
+import { GridIndexTranslator, range } from './util';
 import Vector from './vector';
 import BubbleWrapComponent from './components/test/bubblewrap';
+import { MIDIMessageType } from './launchpad/midimessages';
 
 let launchpad: Launchpad;
 
@@ -120,7 +121,37 @@ async function withMidiAccess(access: MIDIAccess) {
         components,
         new Vector(10, 10),
     );
-    renderComponentToLaunchpad(gridComponent, new Vector(0, 0), launchpad);
+
+    const canvas = Canvas.renderComponent(gridComponent);
+    renderComponentToLaunchpad(canvas, new Vector(0, 0), launchpad);
+    const padIndexTranslator = new GridIndexTranslator(new Vector(10, 10));
+    launchpad.input.addEventListener('midimessage', (e) => {
+        const { data } = e as MIDIMessageEvent;
+        const [msgType, pad, vel] = data;
+        if (
+            !(
+                msgType == MIDIMessageType.NOTE ||
+                msgType == MIDIMessageType.SYSEX
+            )
+        ) {
+            return;
+        }
+
+        const touchPosition = padIndexTranslator
+            .getPosition(pad)
+            .elwiseMult(new Vector(1, -1))
+            .add(new Vector(0, 9));
+        const eventType = vel > 0 ? 'touchDown' : 'touchUp';
+
+        gridComponent.registerTouchEvent(eventType, touchPosition);
+    });
+    gridComponent.requestRender = (componentTrace) => {
+        const canvas = Canvas.renderComponent(
+            gridComponent,
+            componentTrace.slice(1),
+        );
+        renderComponentToLaunchpad(canvas, new Vector(0, 0), launchpad);
+    };
 }
 
 main();

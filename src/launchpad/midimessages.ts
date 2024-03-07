@@ -29,3 +29,8 @@ export class SysExMessage extends MIDIMessage {
 export interface SysExComponent {
     getSysExRepresentation(): Iterable<number>;
 }
+
+export enum MIDIMessageType {
+    NOTE = 149,
+    SYSEX = 181,
+}
