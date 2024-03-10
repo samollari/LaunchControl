@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@types/events": "^3.0.3",
+    "@types/node": "^20.11.25",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "eslint": "^8.57.0",
