@@ -1,8 +1,5 @@
 import { GridLayoutComponent } from './layout/layouts';
 import { renderInteractiveComponentToLaunchpad } from './layout/renderer';
-// import PalleteTestComponent from './components/test/pallete';
-// import RandomColorComponent from './components/test/randomcolor';
-// import { VerticalLayoutComponent } from './layout/layouts';
 import Launchpad, { LaunchpadLayout } from './launchpad/launchpad';
 import { range } from './util';
 import Vector from './vector';
@@ -112,15 +109,18 @@ async function withMidiAccess(access: MIDIAccess) {
     //     renderComponentToLaunchpad(component, new Vector(1, 1), launchpad);
     // }, 1000);
 
+    // Create 100 Bubbles
     const components = [];
     for (const _ of range(100)) {
         components.push(new BubbleWrapComponent());
     }
+    // Arrange them in a grid
     const gridComponent = new GridLayoutComponent(
         components,
         new Vector(10, 10),
     );
 
+    // Render that grid and make it interactive
     renderInteractiveComponentToLaunchpad(
         gridComponent,
         new Vector(0, 0),

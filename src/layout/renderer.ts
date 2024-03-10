@@ -55,9 +55,17 @@ export function renderInteractiveComponentToLaunchpad(
     renderCanvasToLaunchpad(canvas, position, launchpad);
 
     // Make interactive
-    launchpad.addListener('touch', (type, position) =>
-        component.touched(type, position),
-    );
+    launchpad.addListener('touch', (type, offset) => {
+        const componentPosition = offset.sub(position);
+        if (
+            componentPosition.x >= 0 &&
+            componentPosition.x < component.size.x &&
+            componentPosition.y >= 0 &&
+            componentPosition.y < component.size.y
+        ) {
+            component.touched(type, componentPosition);
+        }
+    });
 
     // Make it partially rerender when requested
     component.requestRender = (componentTrace) => {
@@ -65,7 +73,7 @@ export function renderInteractiveComponentToLaunchpad(
             component,
             componentTrace.slice(1),
         );
-        renderCanvasToLaunchpad(canvas, new Vector(0, 0), launchpad);
+        renderCanvasToLaunchpad(canvas, position, launchpad);
     };
 }
 
@@ -76,11 +84,15 @@ export function renderCanvasToLaunchpad(
 ): void {
     launchpad.setLEDs(
         flattenAndLabelPixelMap(canvas)
+            .map((led) => ({
+                position: led.position.add(position),
+                color: led.color,
+            }))
             .filter(notCorners)
             .map(
                 (led) =>
                     new StandardLEDColorDefinition(
-                        positionToIndex(led.position.add(position)),
+                        positionToIndex(led.position),
                         led.color,
                     ),
             ),

@@ -68,6 +68,23 @@ export class HorizontalLayoutComponent extends LayoutComponent {
             .reduce(sum);
         copyToPosition(renderTarget, childCanvas, new Vector(x, 0));
     }
+
+    public touched(eventType: TouchEventType, position: Vector): void {
+        console.log({ eventType, position });
+
+        let offsetPosition = position;
+        for (const component of this.components) {
+            console.log({ offsetPosition, size: component.size });
+            const width = component.size.x;
+
+            if (offsetPosition.x < width) {
+                component.touched(eventType, offsetPosition);
+                return;
+            }
+
+            offsetPosition = offsetPosition.sub(new Vector(width, 0));
+        }
+    }
 }
 
 export class VerticalLayoutComponent extends LayoutComponent {
@@ -99,6 +116,20 @@ export class VerticalLayoutComponent extends LayoutComponent {
             .map((component) => component.size.y)
             .reduce(sum);
         copyToPosition(renderTarget, childCanvas, new Vector(0, y));
+    }
+
+    public touched(eventType: TouchEventType, position: Vector): void {
+        let offsetPosition = position;
+        for (const component of this.components) {
+            const height = component.size.y;
+
+            if (offsetPosition.y < height) {
+                component.touched(eventType, offsetPosition);
+                return;
+            }
+
+            offsetPosition = offsetPosition.sub(new Vector(0, height));
+        }
     }
 }
 
