@@ -43,7 +43,7 @@ export default class ULXDUnit extends EventEmitter {
                     break;
 
                 case 'SAMPLE':
-                    this.onSample(channelNumber, parts);
+                    this.onSample(channelNumber, parts.slice(2));
                     break;
             }
         }
@@ -76,10 +76,10 @@ export default class ULXDUnit extends EventEmitter {
         }
     }
 
-    private onSample(channel: number, [_, diversityStatus, rfLevel, audioLevel]: string[]): void {
+    private onSample(channel: number, [diversityStatus, rfLevel, audioLevel]: string[]): void {
         const diversity = {
             a: diversityStatus.at(0) === 'A',
-            b: diversityStatus.at(0) === 'B',
+            b: diversityStatus.at(1) === 'B',
         };
         const rssi = Number(rfLevel) - 128;
         const audioDBFS = Number(audioLevel) - 50;
