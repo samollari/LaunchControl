@@ -84,7 +84,7 @@ export function colorScale(
 ): number {
     const sortedKeys = Object.keys(scale)
         .map((keyStr) => Number(keyStr))
-        .toSorted((a, b) => a - b);
+        .toSorted((a, b) => b - a);
     const passedThreshold = sortedKeys.find((threshold) => value >= threshold);
-    return passedThreshold ? scale[passedThreshold] : 0;
+    return passedThreshold !== undefined ? scale[passedThreshold] : 0;
 }
