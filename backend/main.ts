@@ -1,7 +1,8 @@
 import { Server } from 'socket.io';
 import ConnectionManager from './ulxd/connectionmanager';
+import { ClientSentEvents, ServerSentEvents } from '../shared/socketevents';
 
-const io = new Server();
+const io = new Server<ClientSentEvents, ServerSentEvents>();
 
 io.listen(3000);
 

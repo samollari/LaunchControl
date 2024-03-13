@@ -1,9 +1,8 @@
-import { GridLayoutComponent } from './layout/layouts';
 import { renderInteractiveComponentToLaunchpad } from './layout/renderer';
 import Launchpad, { LaunchpadLayout } from './launchpad/launchpad';
-import { range } from './util';
 import Vector from './vector';
-import BubbleWrapComponent from './components/test/bubblewrap';
+import ULXD4QComponent from './components/ulxd/ulxd4q';
+import { io } from 'socket.io-client';
 
 let launchpad: Launchpad;
 
@@ -85,45 +84,12 @@ async function withMidiAccess(access: MIDIAccess) {
     await launchpad.init();
     launchpad.clear();
     launchpad.layout = LaunchpadLayout.PROGRAMMER;
-    // launchpad.scrollText(0x7C, true, [
-    //     {
-    //         speed: 5,
-    //         text: 'Hello '
-    //     },
-    //     {
-    //         speed: 2,
-    //         text: 'world!'
-    //     }
-    // ]);
-    // launchpad.pulseLEDs([new StandardLEDColorDefinition(99, 48)]);
-    // launchpad.flashLEDs([new StandardLEDColorDefinition(0x0A, 72)]);
 
-    // const component = new TestComponent(new Vector(8, 1));
+    const socket = io('ws://localhost:3000');
 
-    // const components = [];
-    // for (const _ of range(8)) {
-    //     components.push(new RandomColorComponent(new Vector(8, 1)));
-    // }
-    // const component = new VerticalLayoutComponent(components);
-    // setInterval(() => {
-    //     renderComponentToLaunchpad(component, new Vector(1, 1), launchpad);
-    // }, 1000);
-
-    // Create 100 Bubbles
-    const components = [];
-    for (const _ of range(100)) {
-        components.push(new BubbleWrapComponent());
-    }
-    // Arrange them in a grid
-    const gridComponent = new GridLayoutComponent(
-        components,
-        new Vector(10, 10),
-    );
-
-    // Render that grid and make it interactive
     renderInteractiveComponentToLaunchpad(
-        gridComponent,
-        new Vector(0, 0),
+        new ULXD4QComponent('localhost', socket),
+        new Vector(1, 1),
         launchpad,
     );
 }

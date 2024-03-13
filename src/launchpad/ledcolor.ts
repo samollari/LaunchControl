@@ -77,3 +77,14 @@ export function assertIsLEDIndex(...args: Parameters<typeof isLEDIndex>): void {
         );
     }
 }
+
+export function colorScale(
+    scale: { [key: string]: number },
+    value: number,
+): number {
+    const sortedKeys = Object.keys(scale)
+        .map((keyStr) => Number(keyStr))
+        .toSorted((a, b) => a - b);
+    const passedThreshold = sortedKeys.find((threshold) => value >= threshold);
+    return passedThreshold ? scale[passedThreshold] : 0;
+}

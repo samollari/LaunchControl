@@ -1,9 +1,10 @@
 import { Socket, Server as SocketIOServer } from 'socket.io';
 
 import ULXDDevice from './ulxd stub';
+import { ClientSentEvents, ServerSentEvents } from '../../shared/socketevents';
 
 export default class ConnectionManager {
-    protected io: SocketIOServer;
+    protected io: SocketIOServer<ClientSentEvents, ServerSentEvents>;
 
     public constructor(io: SocketIOServer) {
         this.io = io;
@@ -35,7 +36,13 @@ export default class ConnectionManager {
             this.devices.set(deviceIP, device);
 
             device.on('sample', (channel, diversity, rssi, audioLevel) => {
-                console.log(`sample received for ${deviceIP}`);
+                console.log(
+                    `sample received for ${deviceIP}`,
+                    channel,
+                    diversity,
+                    rssi,
+                    audioLevel,
+                );
                 this.io
                     .to(deviceIP)
                     .emit(

@@ -1,6 +1,8 @@
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
 
+import { range } from '../../src/util';
+
 type ULXDEvents = {
     gain: (channel: number, gainDB: number) => void;
     muteState: (channel: number, muted: boolean) => void;
@@ -22,23 +24,24 @@ export default class ULXDUnit extends (EventEmitter as new () => TypedEmitter<UL
 
         console.log(`stub for ${ip} created`);
 
-        let channel = 0;
         this.interval = setInterval(() => {
             console.log(`interval fired`);
 
-            const diversity = Math.round(Math.random()) == 1 ? 'AX' : 'XB';
-            const rfLevel = Math.floor(Math.random() * 256);
-            const audioLevel = Math.floor(Math.random() * 256);
+            for (const channel of range(4)) {
+                const diversity = Math.round(Math.random()) == 1 ? 'AX' : 'XB';
+                const rfLevel = Math.floor(Math.random() * 256);
+                const audioLevel = Math.floor(Math.random() * 256);
 
-            this.onData(
-                Buffer.from(
-                    `< SAMPLE ${channel + 1} ALL ${diversity} ${String(rfLevel).padStart(3, '0')} ${String(audioLevel).padStart(3, '0')}`,
-                    'ascii',
-                ),
-            );
+                this.onData(
+                    Buffer.from(
+                        `< SAMPLE ${channel + 1} ALL ${diversity} ${String(rfLevel).padStart(3, '0')} ${String(audioLevel).padStart(3, '0')}`,
+                        'ascii',
+                    ),
+                );
+            }
 
-            channel = (channel + 1) % 4;
-        }, 250);
+            // }, 250);
+        }, 1000);
     }
 
     private onData(data: Buffer) {
