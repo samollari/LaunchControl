@@ -2,19 +2,7 @@ import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
 
 import { range } from '../../src/util';
-
-type ULXDEvents = {
-    gain: (channel: number, gainDB: number) => void;
-    muteState: (channel: number, muted: boolean) => void;
-    interferenceState: (channel: number, interferenceDetected: boolean) => void;
-    battBars: (channel: number, battBars: number) => void;
-    sample: (
-        channel: number,
-        diversity: { a: boolean; b: boolean },
-        rssi: number,
-        audioDBFS: number,
-    ) => void;
-};
+import { ULXDEvents } from './ulxd';
 
 export default class ULXDUnit extends (EventEmitter as new () => TypedEmitter<ULXDEvents>) {
     interval: NodeJS.Timeout;

@@ -60,6 +60,9 @@ export default class ConnectionManager {
                     .to(deviceIP)
                     .emit('battBars', deviceIP, channel, battBars);
             });
+            device.on('deviceError', (channel) => {
+                this.io.to(deviceIP).emit('deviceError', deviceIP, channel);
+            });
         }
 
         const socketDevices = this.socketDeviceMap.get(socket.id) ?? [];

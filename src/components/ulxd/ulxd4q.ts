@@ -35,13 +35,39 @@ export default class ULXD4QComponent extends HorizontalLayoutComponent {
                     return;
                 }
 
-                const channelComponent = this.channelComponents[channel - 1];
+                const channelComponent = this.getChannel(channel);
                 channelComponent.setData(diversity, rssi, audioLevel);
             },
         );
+
+        this.socket.on('deviceError', (deviceIP, channel) => {
+            if (deviceIP !== this.ip) {
+                return;
+            }
+
+            if (channel) {
+                this.getChannel(channel).hasError();
+            } else {
+                this.errorAllChannels();
+            }
+        });
+
+        this.socket.on('disconnect', () => {
+            this.errorAllChannels();
+        });
     }
 
     protected subscribe(): void {
         this.socket.emit('SUBSCRIBE', this.ip);
+    }
+
+    protected getChannel(channel: number): ULXDChannelComponent {
+        return this.channelComponents[channel - 1];
+    }
+
+    protected errorAllChannels() {
+        for (const channelComponent of this.channelComponents) {
+            channelComponent.hasError();
+        }
     }
 }

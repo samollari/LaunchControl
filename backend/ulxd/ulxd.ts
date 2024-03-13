@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
 import { Socket, createConnection } from 'net';
 
-type ULXDEvents = {
+export type ULXDEvents = {
     gain: (channel: number, gainDB: number) => void;
     muteState: (channel: number, muted: boolean) => void;
     interferenceState: (channel: number, interferenceDetected: boolean) => void;
@@ -13,6 +13,7 @@ type ULXDEvents = {
         rssi: number,
         audioDBFS: number,
     ) => void;
+    deviceError: (channel?: number) => void;
 };
 
 export default class ULXDUnit extends (EventEmitter as new () => TypedEmitter<ULXDEvents>) {
@@ -26,6 +27,11 @@ export default class ULXDUnit extends (EventEmitter as new () => TypedEmitter<UL
 
         this.socket.on('data', (data) => this.onData(data));
         this.setupConnection();
+        this.socket.on('close', (error) => {
+            if (error) {
+                this.emit('deviceError');
+            }
+        });
     }
 
     private async setupConnection() {
