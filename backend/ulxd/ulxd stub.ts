@@ -1,6 +1,5 @@
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
-import { Socket, createConnection } from 'net';
 
 type ULXDEvents = {
     gain: (channel: number, gainDB: number) => void;
@@ -16,30 +15,30 @@ type ULXDEvents = {
 };
 
 export default class ULXDUnit extends (EventEmitter as new () => TypedEmitter<ULXDEvents>) {
-    public readonly ip: string;
-    private socket: Socket;
+    interval: NodeJS.Timeout;
 
     public constructor(ip: string) {
         super();
-        this.ip = ip;
-        this.socket = createConnection(2202, ip);
 
-        this.socket.on('data', (data) => this.onData(data));
-        this.setupConnection();
-    }
+        console.log(`stub for ${ip} created`);
 
-    private async setupConnection() {
-        if (this.socket.connecting) {
-            let connectionCallback: () => void;
-            const connectionReady = new Promise<void>((resolve) => {
-                connectionCallback = resolve;
-            });
-            this.socket.on('connect', () => connectionCallback());
-            await connectionReady;
-        }
+        let channel = 0;
+        this.interval = setInterval(() => {
+            console.log(`interval fired`);
 
-        // this.socket.write('< GET 0 ALL >');
-        this.socket.write('< SET 0 METER_RATE 00100 >');
+            const diversity = Math.round(Math.random()) == 1 ? 'AX' : 'XB';
+            const rfLevel = Math.floor(Math.random() * 256);
+            const audioLevel = Math.floor(Math.random() * 256);
+
+            this.onData(
+                Buffer.from(
+                    `< SAMPLE ${channel + 1} ALL ${diversity} ${String(rfLevel).padStart(3, '0')} ${String(audioLevel).padStart(3, '0')}`,
+                    'ascii',
+                ),
+            );
+
+            channel = (channel + 1) % 4;
+        }, 250);
     }
 
     private onData(data: Buffer) {
@@ -106,6 +105,6 @@ export default class ULXDUnit extends (EventEmitter as new () => TypedEmitter<UL
     }
 
     public close() {
-        this.socket.destroy();
+        clearInterval(this.interval);
     }
 }
