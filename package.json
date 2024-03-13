@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build:frontend": "tsc && vite build",
     "preview": "vite preview",
     "format": "prettier . --write",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build:backend": "node buildserver.mjs",
+    "server": "node server.js"
   },
   "devDependencies": {
     "@types/events": "^3.0.3",

@@ -1,6 +1,6 @@
 import { Socket, Server as SocketIOServer } from 'socket.io';
 
-import ULXDDevice from './ulxd stub';
+import ULXDDevice from './ulxd';
 import { ClientSentEvents, ServerSentEvents } from '../../shared/socketevents';
 
 export default class ConnectionManager {
