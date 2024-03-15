@@ -69,10 +69,7 @@ export function renderInteractiveComponentToLaunchpad(
 
     // Make it partially rerender when requested
     component.requestRender = (componentTrace) => {
-        const canvas = Canvas.renderComponent(
-            component,
-            componentTrace.slice(1),
-        );
+        const canvas = Canvas.renderComponent(component, componentTrace);
         renderCanvasToLaunchpad(canvas, position, launchpad);
     };
 }
