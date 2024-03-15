@@ -2,11 +2,14 @@ import { LaunchpadModel } from '../launchpad/launchpad';
 import { StandardLEDColorDefinition } from '../launchpad/ledcolor';
 import { callForGrid, range } from '../util';
 import Vector from '../vector';
-import Component, { LocalRenderPixel } from './component';
+import Component, {
+    LocalRenderPixel,
+    LocalRenderPixelMaybeColor,
+} from './component';
 import { LayoutComponent } from './layouts';
 
 export class Canvas {
-    public readonly buffer: number[][];
+    public readonly buffer: (number | undefined)[][];
     public readonly size: Vector;
 
     public constructor(size: Vector) {
@@ -18,7 +21,7 @@ export class Canvas {
         this.buffer[position.x][position.y] = color;
     }
 
-    public get(position: Vector): number {
+    public get(position: Vector): number | undefined {
         return this.buffer[position.x][position.y];
     }
 
@@ -86,6 +89,7 @@ export function renderCanvasToLaunchpad(
                 color: led.color,
             }))
             .filter(notCorners)
+            .filter(definedColors)
             .map(
                 (led) =>
                     new StandardLEDColorDefinition(
@@ -96,13 +100,19 @@ export function renderCanvasToLaunchpad(
     );
 }
 
-function notCorners({ position }: LocalRenderPixel): boolean {
+function notCorners({ position }: LocalRenderPixelMaybeColor): boolean {
     return ![
         new Vector(0, 0),
         new Vector(9, 0),
         new Vector(0, 9),
         new Vector(9, 9),
     ].some((vec) => vec.equals(position));
+}
+
+function definedColors(
+    pixel: LocalRenderPixelMaybeColor,
+): pixel is LocalRenderPixel {
+    return pixel.color !== undefined;
 }
 
 export function createRenderTarget(size: Vector): number[][] {
@@ -113,8 +123,10 @@ export function createRenderTarget(size: Vector): number[][] {
     return pixels;
 }
 
-export function flattenAndLabelPixelMap(canvas: Canvas): LocalRenderPixel[] {
-    const renderedPixels = Array<LocalRenderPixel>();
+export function flattenAndLabelPixelMap(
+    canvas: Canvas,
+): LocalRenderPixelMaybeColor[] {
+    const renderedPixels = Array<LocalRenderPixelMaybeColor>();
     callForGrid(canvas.size, (position) => {
         renderedPixels.push({
             position: position,
@@ -131,7 +143,10 @@ export function copyToPosition(
 ) {
     callForGrid(childCanvas.size, (offset) => {
         const target = position.add(offset);
-        parentCanvas.set(target, childCanvas.get(offset));
+        const childColor = childCanvas.get(offset);
+        if (childColor) {
+            parentCanvas.set(target, childColor);
+        }
     });
 }
 
