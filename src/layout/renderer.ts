@@ -144,7 +144,7 @@ export function copyToPosition(
     callForGrid(childCanvas.size, (offset) => {
         const target = position.add(offset);
         const childColor = childCanvas.get(offset);
-        if (childColor) {
+        if (childColor !== undefined) {
             parentCanvas.set(target, childColor);
         }
     });

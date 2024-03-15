@@ -32,9 +32,9 @@ export abstract class LayoutComponent extends Component {
     }
 
     protected partialRenderRequestedChild(componentTrace: Component[]): Canvas {
-        const childComponent = componentTrace[0];
+        const [childComponent, ...restComponentTrace] = componentTrace;
         assertIsElementOf(childComponent, this.components);
-        return Canvas.renderComponent(childComponent, componentTrace.slice(1));
+        return Canvas.renderComponent(childComponent, restComponentTrace);
     }
 }
 
@@ -67,7 +67,7 @@ export class HorizontalLayoutComponent extends LayoutComponent {
         const x = this.components
             .slice(0, requestedChildIndex)
             .map((component) => component.size.x)
-            .reduce(sum);
+            .reduce(sum, 0);
         copyToPosition(renderTarget, childCanvas, new Vector(x, 0));
     }
 
@@ -118,7 +118,7 @@ export class VerticalLayoutComponent extends LayoutComponent {
         const y = this.components
             .slice(0, requestedChildIndex)
             .map((component) => component.size.y)
-            .reduce(sum);
+            .reduce(sum, 0);
         copyToPosition(renderTarget, childCanvas, new Vector(0, y));
     }
 
