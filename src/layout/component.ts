@@ -7,6 +7,11 @@ export type LocalRenderPixel = {
     color: number;
 };
 
+export type LocalRenderPixelMaybeColor = {
+    position: Vector;
+    color: number | undefined;
+};
+
 export type RequestRenderFunction = (componentTrace: Component[]) => void;
 
 export default abstract class Component {
