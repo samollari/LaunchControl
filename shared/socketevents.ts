@@ -15,4 +15,5 @@ export type ServerSentEvents = {
 
 export type ClientSentEvents = {
     SUBSCRIBE: (deviceIP: string) => void;
+    FLASH: (deviceIP: string, channel: number) => void;
 };
