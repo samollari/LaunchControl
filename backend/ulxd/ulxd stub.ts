@@ -95,4 +95,8 @@ export default class ULXDUnit extends AbstractULXDUnit {
     public close() {
         clearInterval(this.interval);
     }
+
+    public flash(channel: number): void {
+        console.log(`STUB: flashing channel ${channel}`);
+    }
 }

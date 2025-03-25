@@ -22,6 +22,8 @@ export abstract class AbstractULXDUnit extends (EventEmitter as new () => TypedE
     public constructor(public readonly ip: string) {
         super();
     }
+
+    public abstract flash(channel: number): void;
 }
 
 export default class ULXDUnit extends AbstractULXDUnit {
@@ -115,6 +117,13 @@ export default class ULXDUnit extends AbstractULXDUnit {
         const rssi = Number(rfLevel) - 128;
         const audioDBFS = Number(audioLevel) - 50;
         this.emit('sample', channel, diversity, rssi, audioDBFS);
+    }
+
+    public flash(channel: number) {
+        this.socket.write(`< SET ${channel} FLASH ON >`);
+        // setTimeout(() => {
+        //     this.socket.write(`< SET ${channel} FLASH OFF >`);
+        // }, 5_000);
     }
 
     public close() {

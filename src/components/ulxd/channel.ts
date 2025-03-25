@@ -119,6 +119,13 @@ export default class ULXDChannelComponent extends Component {
         console.log({ eventType, position });
         if (eventType === 'touchDown') {
             if (
+                position.x === 0 &&
+                (this.channelSize == 2 || !this.unacknowledged_high_level)
+            ) {
+                console.log('requesting flash');
+                this.requestChannelFlash();
+            }
+            if (
                 position.x == this.channelSize - 1 &&
                 this.unacknowledged_high_level
             ) {

@@ -18,8 +18,18 @@ export default class ULXD4QComponent extends HorizontalLayoutComponent {
         channelSize: 1 | 2 = 2,
     ) {
         const channels = new Array(4);
+        function buildFlashFunction(channel: number): () => void {
+            return () => {
+                console.log(`flashing ${ip} channel ${channel}`);
+                socket.emit('FLASH', ip, channel);
+            };
+        }
+
         for (const i of range(4)) {
-            channels[i] = new ULXDChannelComponent(channelSize);
+            channels[i] = new ULXDChannelComponent(
+                channelSize,
+                buildFlashFunction(i + 1),
+            );
         }
         super(channels);
         this.channelComponents = channels;

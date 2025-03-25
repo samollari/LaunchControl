@@ -23,6 +23,11 @@ io.on('connection', (socket) => {
         connectionManager.registerSocketToDevice(socket, device);
     });
 
+    socket.on('FLASH', (device, channel) => {
+        console.log(`${socket.id} flashing ${device} channel ${channel}`);
+        connectionManager.getDevice(device).flash(channel);
+    });
+
     socket.on('disconnect', () => {
         connectionManager.deregisterSocket(socket);
     });

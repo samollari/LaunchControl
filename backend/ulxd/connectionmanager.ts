@@ -12,7 +12,7 @@ export default class ConnectionManager {
 
     // ==========
 
-    protected getDevice(ip: string): ULXDDevice {
+    public getDevice(ip: string): ULXDDevice {
         const storedDevice = this.devices.get(ip);
         if (storedDevice) {
             return storedDevice;
