@@ -16,4 +16,10 @@ export type ServerSentEvents = {
 export type ClientSentEvents = {
     SUBSCRIBE: (deviceIP: string) => void;
     FLASH: (deviceIP: string, channel: number) => void;
+    OSC_SEND: (
+        deviceIP: string,
+        port: number,
+        path: string,
+        args: string[],
+    ) => void;
 };
