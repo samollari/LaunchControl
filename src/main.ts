@@ -8,8 +8,8 @@ let launchpad: Launchpad;
 
 async function main() {
     const midiPermissions = await navigator.permissions.query({
-        // @ts-expect-error Doesn't include midi types
         name: 'midi',
+        // @ts-expect-error Doesn't include midi types
         sysex: true,
     });
 
@@ -60,10 +60,16 @@ async function withMidiAccess(access: MIDIAccess) {
     console.log({ inputs: access.inputs, outputs: access.outputs });
 
     const inputDevice = ([...access.inputs].find(
-        ([_, input]) => input.name?.includes('MIDIIN2') ?? false,
+        ([_, input]) =>
+            input.name?.includes('MIDIIN2') ||
+            input.name?.includes('Standalone') ||
+            false,
     ) ?? [])[1];
     const outputDevice = ([...access.outputs].find(
-        ([_, output]) => output.name?.includes('MIDIOUT2') ?? false,
+        ([_, output]) =>
+            output.name?.includes('MIDIOUT2') ||
+            output.name?.includes('Standalone') ||
+            false,
     ) ?? [])[1];
 
     const inputElement =
@@ -88,7 +94,7 @@ async function withMidiAccess(access: MIDIAccess) {
     const socket = io('ws://localhost:3000');
 
     renderInteractiveComponentToLaunchpad(
-        new ULXD4QComponent('localhost', socket),
+        new ULXD4QComponent('localhost', socket, 1),
         new Vector(1, 1),
         launchpad,
     );
