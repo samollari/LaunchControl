@@ -1,24 +1,21 @@
-import EventEmitter from 'events';
-import TypedEmitter from 'typed-emitter';
-
 import { range } from '../../src/util';
-import { ULXDEvents } from './ulxd';
+import { AbstractULXDUnit } from './ulxd';
 
-export default class ULXDUnit extends (EventEmitter as new () => TypedEmitter<ULXDEvents>) {
+export default class ULXDUnit extends AbstractULXDUnit {
     interval: NodeJS.Timeout;
 
     public constructor(ip: string) {
-        super();
+        super(ip);
 
         console.log(`stub for ${ip} created`);
 
         this.interval = setInterval(() => {
-            console.log(`interval fired`);
+            // console.log(`interval fired`);
 
             for (const channel of range(4)) {
                 const diversity = Math.round(Math.random()) == 1 ? 'AX' : 'XB';
                 const rfLevel = Math.floor(Math.random() * 256);
-                const audioLevel = Math.floor(Math.random() * 256);
+                const audioLevel = Math.floor(Math.random() * 50);
 
                 this.onData(
                     Buffer.from(
@@ -35,7 +32,7 @@ export default class ULXDUnit extends (EventEmitter as new () => TypedEmitter<UL
     private onData(data: Buffer) {
         const dataString = data.toString();
 
-        for (const message of dataString.slice(2, -1).split('><')) {
+        for (const message of dataString.slice(2).split('><')) {
             const [type, ...parts] = message.trim().split(' ');
             const channelNumber = Number(parts[0]);
 

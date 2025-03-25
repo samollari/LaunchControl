@@ -15,10 +15,11 @@ export default class ULXD4QComponent extends HorizontalLayoutComponent {
     public constructor(
         ip: string,
         socket: Socket<ServerSentEvents, ClientSentEvents>,
+        channelSize: 1 | 2 = 2,
     ) {
         const channels = new Array(4);
         for (const i of range(4)) {
-            channels[i] = new ULXDChannelComponent();
+            channels[i] = new ULXDChannelComponent(channelSize);
         }
         super(channels);
         this.channelComponents = channels;
