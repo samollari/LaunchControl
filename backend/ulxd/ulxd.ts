@@ -16,13 +16,19 @@ export type ULXDEvents = {
     deviceError: (channel?: number) => void;
 };
 
-export default class ULXDUnit extends (EventEmitter as new () => TypedEmitter<ULXDEvents>) {
-    public readonly ip: string;
+export abstract class AbstractULXDUnit extends (EventEmitter as new () => TypedEmitter<ULXDEvents>) {
+    public abstract close(): void;
+
+    public constructor(public readonly ip: string) {
+        super();
+    }
+}
+
+export default class ULXDUnit extends AbstractULXDUnit {
     private socket: Socket;
 
     public constructor(ip: string) {
-        super();
-        this.ip = ip;
+        super(ip);
         this.socket = createConnection(2202, ip);
 
         this.socket.on('data', (data) => this.onData(data));

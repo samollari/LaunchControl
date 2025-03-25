@@ -4,7 +4,12 @@ import { ClientSentEvents, ServerSentEvents } from '../shared/socketevents';
 
 const io = new Server<ClientSentEvents, ServerSentEvents>();
 
-io.listen(3000);
+io.listen(3000, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+    },
+});
 
 console.log('socket.io server listing');
 
