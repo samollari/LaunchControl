@@ -172,18 +172,20 @@ function getDeviceForRequestIfHasType<
           : never;
 }
 
-async function hookFormSubmit<N extends KeyReqTypeMap>(
-    form: HTMLFormElement,
-    requests: MIDIRequests<N>,
-    access: MIDIAccess,
-): Promise<MIDIDevices<N>> {
-    const formData = await new Promise<FormData>((resolve) => {
+async function hookFormSubmit(form: HTMLFormElement): Promise<FormData> {
+    return await new Promise<FormData>((resolve) => {
         form.addEventListener('submit', (event) => {
             event.preventDefault();
             resolve(new FormData(form));
         });
     });
+}
 
+function processFormData<N extends KeyReqTypeMap>(
+    formData: FormData,
+    requests: MIDIRequests<N>,
+    access: MIDIAccess,
+): MIDIDevices<N> {
     return Object.fromEntries(
         (Object.keys(requests) as K<N>[]).map((reqId) => {
             const request = requests[reqId];
@@ -252,26 +254,39 @@ export default async function getMIDIDevices<N extends KeyReqTypeMap>(
     form.appendChild(submitButton);
     mountElement.appendChild(form);
 
-    return await hookFormSubmit(form, requests, access)
-        .catch((e) => {
-            console.error(e);
-            const errorText = document.createElement('pre');
-            errorText.textContent = String(e);
-            errorText.style.color = 'red';
-            mountElement.appendChild(errorText);
-            return Promise.reject(e);
-        })
-        .finally(() => {
-            form.querySelectorAll('input').forEach((input) => {
-                input.disabled = true;
-            });
-            form.querySelector('button[type="submit"]')?.remove();
-            const reconfigureButton = document.createElement('button');
-            reconfigureButton.textContent = 'Reconfigure';
-            reconfigureButton.onclick = (event) => {
-                event.preventDefault();
-                location.reload();
-            };
-            mountElement.appendChild(reconfigureButton);
+    const formData = await hookFormSubmit(form);
+
+    let value: MIDIDevices<N> | Error;
+
+    try {
+        value = processFormData(formData, requests, access);
+    } catch (e) {
+        console.error(e);
+        const errorText = document.createElement('pre');
+        errorText.textContent = String(e);
+        errorText.style.color = 'red';
+        mountElement.appendChild(errorText);
+        if (e instanceof Error) {
+            value = e;
+        } else {
+            value = new Error(`Unknown error: ${JSON.stringify(e, null, 2)}`);
+        }
+    } finally {
+        form.querySelectorAll('input').forEach((input) => {
+            input.disabled = true;
         });
+        form.querySelector('button[type="submit"]')?.remove();
+        const reconfigureButton = document.createElement('button');
+        reconfigureButton.textContent = 'Reconfigure';
+        reconfigureButton.onclick = (event) => {
+            event.preventDefault();
+            location.reload();
+        };
+        mountElement.appendChild(reconfigureButton);
+    }
+    if (value instanceof Error) {
+        throw value;
+    } else {
+        return value;
+    }
 }
