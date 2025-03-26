@@ -67,7 +67,7 @@ type FilteredRequests<T extends IO, N extends KeyReqTypeMap> = {
             : never;
 };
 
-function pluralizeIO(type: IO): `${typeof type}s` {
+function pluralizeIO<T extends IO>(type: T): `${T}s` {
     return type === 'input' ? 'inputs' : 'outputs';
 }
 
