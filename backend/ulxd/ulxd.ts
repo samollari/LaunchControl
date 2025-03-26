@@ -35,11 +35,41 @@ export default class ULXDUnit extends AbstractULXDUnit {
 
         this.socket.on('data', (data) => this.onData(data));
         this.setupConnection();
+        this.socket.on('error', (error) => {
+            console.error('Socket error:', error);
+            this.emit('deviceError');
+            this.resetConnection();
+        });
+        this.socket.on('timeout', () => {
+            console.error('Socket timeout');
+            // this.socket.destroy();
+            this.emit('deviceError');
+            this.resetConnection();
+        });
         this.socket.on('close', (error) => {
             if (error) {
                 this.emit('deviceError');
+                this.resetConnection();
             }
         });
+    }
+
+    private resetConnection() {
+        const reconnect = () => {
+            this.socket.connect({ port: 2202, host: this.ip });
+            this.setupConnection();
+        };
+        setTimeout(() => {
+            this.socket.removeAllListeners('connect');
+            this.socket.resetAndDestroy();
+            if (this.socket.closed) {
+                reconnect();
+            } else {
+                this.socket.once('close', () => {
+                    reconnect();
+                });
+            }
+        }, 1000);
     }
 
     private async setupConnection() {
@@ -48,7 +78,7 @@ export default class ULXDUnit extends AbstractULXDUnit {
             const connectionReady = new Promise<void>((resolve) => {
                 connectionCallback = resolve;
             });
-            this.socket.on('connect', () => connectionCallback());
+            this.socket.once('connect', () => connectionCallback());
             await connectionReady;
         }
 
