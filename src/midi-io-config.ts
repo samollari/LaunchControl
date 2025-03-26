@@ -152,9 +152,6 @@ function getDeviceForRequestIfHasType<
         (type === 'output' && !requestsOutput(request))
     ) {
         return undefined;
-        // throw new Error(
-        //     `Request ${reqId} of type ${MIDIRequestType[request.requestType]} is not an ${type}`,
-        // );
     }
 
     const deviceId = formData.get(`${reqId}-${type}`) as string | null;
@@ -232,12 +229,6 @@ export default async function getMIDIDevices<N extends KeyReqTypeMap>(
     requests: MIDIRequests<N>,
     mountElement: HTMLElement,
 ): Promise<MIDIDevices<N>> {
-    // const permissions = await navigator.permissions.query({
-    //     name: 'midi',
-    //     // @ts-expect-error Doesn't include midi types
-    //     sysex: true,
-    // });
-
     const access = await navigator.requestMIDIAccess({
         sysex: true,
     });
