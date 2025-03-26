@@ -18,7 +18,6 @@ async function main() {
                 requestName: 'Launchpad',
                 requestType: MIDIRequestType.INPUT_OUTPUT,
             },
-            },
         },
         document.querySelector('#app')!,
     );
