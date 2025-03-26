@@ -10,6 +10,8 @@ export type MIDIRequests<N extends KeyReqTypeMap> = {
     [key in keyof N]: {
         requestName: string;
         requestType: N[key];
+        preferredInput?: (inputs: MIDIInput[]) => MIDIInput | undefined;
+        preferredOutput?: (outputs: MIDIOutput[]) => MIDIOutput | undefined;
     };
 };
 
@@ -67,15 +69,15 @@ type FilteredRequests<T extends IO, N extends KeyReqTypeMap> = {
             : never;
 };
 
-function pluralizeIO<T extends IO>(type: T): `${T}s` {
+function pluralizeIO(type: IO): `${IO}s` {
     return type === 'input' ? 'inputs' : 'outputs';
 }
 
-function buildDeviceMatrix<N extends KeyReqTypeMap>(
-    requests: MIDIRequests<N>,
-    access: MIDIAccess,
-    type: IO,
-): HTMLFieldSetElement {
+function buildDeviceMatrix<
+    N extends KeyReqTypeMap,
+    T extends IO,
+    D extends (T extends 'input' ? MIDIInput : MIDIOutput)[],
+>(requests: MIDIRequests<N>, devices: D, type: T): HTMLFieldSetElement {
     const requestsOfType = Object.fromEntries(
         Object.entries(requests).filter(([_, request]) => {
             if (type === 'input') {
@@ -85,11 +87,6 @@ function buildDeviceMatrix<N extends KeyReqTypeMap>(
             }
         }),
     ) as FilteredRequests<typeof type, N>;
-
-    const typeKey = pluralizeIO(type);
-    const devicesOfType = [...access[typeKey].values()] as
-        | MIDIInput[]
-        | MIDIOutput[];
 
     const container = document.createElement('fieldset');
     const label = document.createElement('label');
@@ -111,7 +108,7 @@ function buildDeviceMatrix<N extends KeyReqTypeMap>(
     table.appendChild(header);
     const body = document.createElement('tbody');
 
-    for (const device of devicesOfType) {
+    for (const device of devices) {
         const row = document.createElement('tr');
         const deviceName = document.createElement('td');
         deviceName.textContent = device.name;
@@ -225,6 +222,43 @@ function processFormData<N extends KeyReqTypeMap>(
     ) as MIDIDevices<N>;
 }
 
+function applyConnectionPreferences<N extends KeyReqTypeMap>(
+    requests: MIDIRequests<N>,
+    form: HTMLFormElement,
+    inputs: MIDIInput[],
+    outputs: MIDIOutput[],
+): void {
+    for (const reqId in requests) {
+        const request = requests[reqId];
+        if (requestsInput(request)) {
+            const preferredInput = request.preferredInput?.(inputs);
+            if (preferredInput) {
+                const inputRadio = form.querySelector(
+                    `input[name="${reqId}-input"][value="${preferredInput.id}"]`,
+                ) as HTMLInputElement | null;
+                if (inputRadio) {
+                    inputRadio.checked = true;
+                }
+            }
+        }
+    }
+
+    for (const reqId in requests) {
+        const request = requests[reqId];
+        if (requestsOutput(request)) {
+            const preferredOutput = request.preferredOutput?.(outputs);
+            if (preferredOutput) {
+                const outputRadio = form.querySelector(
+                    `input[name="${reqId}-output"][value="${preferredOutput.id}"]`,
+                ) as HTMLInputElement | null;
+                if (outputRadio) {
+                    outputRadio.checked = true;
+                }
+            }
+        }
+    }
+}
+
 export default async function getMIDIDevices<N extends KeyReqTypeMap>(
     requests: MIDIRequests<N>,
     mountElement: HTMLElement,
@@ -235,8 +269,11 @@ export default async function getMIDIDevices<N extends KeyReqTypeMap>(
 
     const form = document.createElement('form');
 
-    const inputContainer = buildDeviceMatrix(requests, access, 'input');
-    const outputContainer = buildDeviceMatrix(requests, access, 'output');
+    const inputs = [...access.inputs.values()];
+    const outputs = [...access.outputs.values()];
+
+    const inputContainer = buildDeviceMatrix(requests, inputs, 'input');
+    const outputContainer = buildDeviceMatrix(requests, outputs, 'output');
     form.appendChild(inputContainer);
     form.appendChild(outputContainer);
     const submitButton = document.createElement('button');
@@ -244,6 +281,8 @@ export default async function getMIDIDevices<N extends KeyReqTypeMap>(
     submitButton.textContent = 'Submit';
     form.appendChild(submitButton);
     mountElement.appendChild(form);
+
+    applyConnectionPreferences(requests, form, inputs, outputs);
 
     const formData = await hookFormSubmit(form);
 
