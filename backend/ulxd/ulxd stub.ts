@@ -13,7 +13,13 @@ export default class ULXDUnit extends AbstractULXDUnit {
             // console.log(`interval fired`);
 
             for (const channel of range(4)) {
-                const diversity = Math.round(Math.random()) == 1 ? 'AX' : 'XB';
+                const diversityStatus = Math.round(Math.random() * 3);
+                const diversity =
+                    diversityStatus == 0
+                        ? 'XX'
+                        : diversityStatus == 1
+                          ? 'AX'
+                          : 'XB';
                 const rfLevel = Math.floor(Math.random() * 256);
                 const audioLevel = Math.floor(Math.random() * 50);
 
