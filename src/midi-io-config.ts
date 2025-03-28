@@ -222,6 +222,32 @@ function processFormData<N extends KeyReqTypeMap>(
     ) as MIDIDevices<N>;
 }
 
+function setInput(
+    form: HTMLFormElement,
+    reqId: string,
+    deviceId: string,
+): void {
+    const inputRadio = form.querySelector(
+        `input[name="${reqId}-input"][value="${deviceId}"]`,
+    ) as HTMLInputElement | null;
+    if (inputRadio) {
+        inputRadio.checked = true;
+    }
+}
+
+function setOutput(
+    form: HTMLFormElement,
+    reqId: string,
+    deviceId: string,
+): void {
+    const outputRadio = form.querySelector(
+        `input[name="${reqId}-output"][value="${deviceId}"]`,
+    ) as HTMLInputElement | null;
+    if (outputRadio) {
+        outputRadio.checked = true;
+    }
+}
+
 function applyConnectionPreferences<N extends KeyReqTypeMap>(
     requests: MIDIRequests<N>,
     form: HTMLFormElement,
@@ -233,12 +259,7 @@ function applyConnectionPreferences<N extends KeyReqTypeMap>(
         if (requestsInput(request)) {
             const preferredInput = request.preferredInput?.(inputs);
             if (preferredInput) {
-                const inputRadio = form.querySelector(
-                    `input[name="${reqId}-input"][value="${preferredInput.id}"]`,
-                ) as HTMLInputElement | null;
-                if (inputRadio) {
-                    inputRadio.checked = true;
-                }
+                setInput(form, reqId, preferredInput.id);
             }
         }
     }
@@ -248,15 +269,87 @@ function applyConnectionPreferences<N extends KeyReqTypeMap>(
         if (requestsOutput(request)) {
             const preferredOutput = request.preferredOutput?.(outputs);
             if (preferredOutput) {
-                const outputRadio = form.querySelector(
-                    `input[name="${reqId}-output"][value="${preferredOutput.id}"]`,
-                ) as HTMLInputElement | null;
-                if (outputRadio) {
-                    outputRadio.checked = true;
-                }
+                setOutput(form, reqId, preferredOutput.id);
             }
         }
     }
+}
+
+const PREFERENCES_KEY = 'midi-io-preferences';
+type Preferences = { schemaVersion: 1 } & PreferencesV1;
+type PreferencesV1 = {
+    inputs: { [request: string]: string | undefined };
+    outputs: { [request: string]: string | undefined };
+};
+
+function applyUserPreferences<N extends KeyReqTypeMap>(
+    requests: MIDIRequests<N>,
+    form: HTMLFormElement,
+    inputs: MIDIInput[],
+    outputs: MIDIOutput[],
+): void {
+    const preferencesString = localStorage.getItem(PREFERENCES_KEY);
+    if (preferencesString === null) {
+        return;
+    }
+    const preferences = JSON.parse(preferencesString) as Preferences;
+
+    switch (preferences.schemaVersion) {
+        case 1: {
+            for (const reqId in requests) {
+                const request = requests[reqId];
+                if (requestsInput(request)) {
+                    const preferredInput = preferences.inputs[reqId];
+                    if (preferredInput) {
+                        const input = inputs.find(
+                            (input) => input.id === preferredInput,
+                        );
+                        if (input) {
+                            setInput(form, reqId, input.id);
+                        }
+                    }
+                }
+                if (requestsOutput(request)) {
+                    const preferredOutput = preferences.outputs[reqId];
+                    if (preferredOutput) {
+                        const output = outputs.find(
+                            (output) => output.id === preferredOutput,
+                        );
+                        if (output) {
+                            setOutput(form, reqId, output.id);
+                        }
+                    }
+                }
+            }
+            break;
+        }
+        default:
+            console.warn(
+                `Unknown preferences schema version: ${preferences.schemaVersion}`,
+            );
+    }
+}
+
+function saveUserPreferences<N extends KeyReqTypeMap>(
+    devices: MIDIDevices<N>,
+): void {
+    const preferences: Preferences = {
+        schemaVersion: 1,
+        inputs: {},
+        outputs: {},
+    };
+
+    for (const reqId in devices) {
+        const device = devices[reqId];
+        if ('input' in device && device.input) {
+            preferences.inputs[reqId] = device.input.id;
+        }
+        if ('output' in device && device.output) {
+            preferences.outputs[reqId] = device.output.id;
+        }
+    }
+
+    localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
 }
 
 export default async function getMIDIDevices<N extends KeyReqTypeMap>(
@@ -283,6 +376,7 @@ export default async function getMIDIDevices<N extends KeyReqTypeMap>(
     mountElement.appendChild(form);
 
     applyConnectionPreferences(requests, form, inputs, outputs);
+    applyUserPreferences(requests, form, inputs, outputs);
 
     const formData = await hookFormSubmit(form);
 
@@ -290,6 +384,7 @@ export default async function getMIDIDevices<N extends KeyReqTypeMap>(
 
     try {
         value = processFormData(formData, requests, access);
+        saveUserPreferences(value);
     } catch (e) {
         console.error(e);
         const errorText = document.createElement('pre');
